@@ -362,3 +362,8 @@ textarea:focus, select:focus, input:focus { border-color: var(--accent); outline
 /* For acquirers */
 .acquirers .acq-list { margin: 16px 0; padding-left: 1.2em; line-height: 1.6; }
 .acquirers .acq-links { margin-top: 12px; }
+
+/* The analytics choice banner (js/track.js), on every page. */
+.consent { position: fixed; left: 16px; bottom: 16px; z-index: 80; max-width: 380px; padding: 16px; border-radius: 16px;
+  background: var(--surface); border: 1px solid var(--line); box-shadow: 0 30px 70px -30px rgba(10, 12, 30, .5); font: 500 14px/1.45 var(--body); color: var(--ink); }
+.consent p { margin: 0 0 12px; } .consent-row { display: flex; gap: 8px; justify-content: flex-end; }
