@@ -141,7 +141,7 @@
   var log = $("try-log"), face = document.querySelector(".mbar-face");
   function msg(cls, text) {
     var p = document.createElement("p"); p.className = "msg " + cls;
-    if (cls.indexOf("r") === 0 && text) { var b = document.createElement("b"); b.textContent = "○‿○"; p.appendChild(b); }
+    if (cls.indexOf("r") === 0 && text) { var b = document.createElement("img"); b.className = "msg-face"; b.src = "img/mark.svg"; b.alt = ""; p.appendChild(b); }
     if (text) p.appendChild(document.createTextNode(text));
     log.appendChild(p); log.scrollTop = log.scrollHeight; return p;
   }
