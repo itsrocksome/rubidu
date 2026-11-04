@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubidu Reader: listen to any PDF, offline, on your Mac</title>
+<meta name="description" content="Rubidu Reader reads PDFs, articles and any text aloud in a natural voice that runs on your Mac. No subscription, no account, nothing uploaded.">
+<meta property="og:title" content="Rubidu Reader: listen to any PDF, offline, on your Mac">
+<meta property="og:description" content="A natural voice that runs entirely on your Mac. One price, no subscription. Join the waitlist.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://itsrocksome.github.io/rubidu/reader.html">
+<link rel="canonical" href="https://itsrocksome.github.io/rubidu/reader.html">
+<link rel="icon" href="img/mark.svg" type="image/svg+xml">
+<!-- Drop-in page for the Rubidu website (docs/reader/VALIDATION.md). Self-contained styles so it also previews
+     from the repo; js/config.js gives the waitlist address, js/track.js counts visits, both only on the site. -->
+<style>
+:root { --bg:#fbfbfd; --fg:#1d1d1f; --mute:#6e6e73; --card:#fff; --line:#d2d2d7; --accent:#0071e3; --ok:#1e8e3e; --bad:#c62828; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#000; --fg:#f5f5f7; --mute:#a1a1a6; --card:#1c1c1e; --line:#38383a; --accent:#2997ff; --ok:#30d158; --bad:#ff6961; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing:antialiased; }
+.wrap { max-width:720px; margin:0 auto; padding:56px 16px 96px; }
+.back { color:var(--mute); text-decoration:none; font-size:15px; }
+.kicker { color:var(--accent); font-weight:600; font-size:15px; margin:40px 0 8px; }
+h1 { font-size:clamp(34px, 6vw, 52px); line-height:1.08; letter-spacing:-0.02em; margin:0 0 16px; }
+.lede { font-size:21px; color:var(--mute); margin:0 0 32px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; margin:0 0 24px; }
+.card h2 { font-size:19px; margin:0 0 4px; }
+.card p { margin:0 0 14px; color:var(--mute); font-size:15px; }
+audio { width:100%; }
+h2.sec { font-size:28px; letter-spacing:-0.01em; margin:48px 0 16px; }
+ul.feat { list-style:none; padding:0; margin:0; display:grid; gap:14px; }
+ul.feat li { padding-left:28px; position:relative; }
+ul.feat li::before { content:"✓"; position:absolute; left:0; color:var(--accent); font-weight:700; }
+ul.feat b { display:block; }
+ul.feat span { color:var(--mute); font-size:15px; }
+.row { display:flex; gap:8px; flex-wrap:wrap; }
+input[type=email] { flex:1 1 220px; min-width:0; font:inherit; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+button { font:inherit; font-weight:600; padding:12px 20px; border-radius:12px; border:0; background:var(--accent); color:#fff; cursor:pointer; }
+button:disabled { opacity:.6; cursor:default; }
+button.chip { background:transparent; color:var(--fg); border:1px solid var(--line); font-weight:500; padding:8px 14px; }
+button.chip:hover { border-color:var(--accent); }
+.fine { color:var(--mute); font-size:13px; margin:10px 0 0; }
+.fine a { color:inherit; }
+.status { min-height:1.4em; font-size:15px; margin:10px 0 0; }
+.status.bad { color:var(--bad); } .status.ok { color:var(--ok); }
+.hp { position:absolute; left:-9999px; }
+.faq h3 { font-size:17px; margin:24px 0 4px; }
+.faq p { margin:0; color:var(--mute); }
+:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="./">← Rubidu</a>
+  <p class="kicker">Rubidu Reader · in development</p>
+  <h1>Listen to your PDFs. In a natural voice, on your Mac.</h1>
+  <p class="lede">Drop in a PDF, an article or any text, and Reader reads it to you. The voice runs entirely on your
+    Mac, so nothing is uploaded, it works on a plane, and there is no subscription.</p>
+
+  <section class="card" aria-labelledby="hear-h">
+    <h2 id="hear-h">Hear it</h2>
+    <p>A one-page article read by Reader's voice, made on a MacBook Air with nothing sent online. This is the real
+      voice, not a studio recording.</p>
+    <audio controls preload="none" src="audio/reader-sample.m4a"></audio>
+  </section>
+
+  <section class="card" id="waitlist" aria-labelledby="wl-h">
+    <h2 id="wl-h">Get one email when it's ready</h2>
+    <p>No newsletter. One email when Reader is ready, and that's it.</p>
+    <form id="wl-form" novalidate>
+      <div class="row">
+        <label class="hp" for="wl-email">Your email</label>
+        <input id="wl-email" type="email" inputmode="email" autocomplete="email" maxlength="200" placeholder="you@example.com" required>
+        <button id="wl-send" type="submit">Join the waitlist</button>
+      </div>
+      <div class="hp" aria-hidden="true"><label for="wl-website">Leave this empty</label><input id="wl-website" tabindex="-1" autocomplete="off"></div>
+      <p class="fine">Your email is only used for that one message. <a href="privacy.html#waitlist">How it is handled</a>.</p>
+      <p class="status" id="wl-status" role="status" aria-live="polite"></p>
+    </form>
+    <div id="wl-done" hidden tabindex="-1">
+      <p class="status ok" id="wl-pos">You're on the list.</p>
+      <p>One question helps me price it fairly. If Reader did what this page says, what would you pay?</p>
+      <div class="row" id="wl-pay">
+        <button class="chip" type="button" data-pay="once-low">$19 once</button>
+        <button class="chip" type="button" data-pay="once-high">$39 once</button>
+        <button class="chip" type="button" data-pay="monthly">A small monthly fee</button>
+        <button class="chip" type="button" data-pay="unsure">Not sure</button>
+      </div>
+      <p class="status" id="wl-more-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <h2 class="sec">What it will do</h2>
+  <ul class="feat">
+    <li><b>Reads what you have</b><span>PDFs, EPUBs, web articles, and any text you select in any app.</span></li>
+    <li><b>Follow along</b><span>Each sentence is highlighted as it is read. Change the speed, skip back a sentence.</span></li>
+    <li><b>Take it with you</b><span>Save any document as an audio file for a walk or a commute. On a MacBook Air M2 the
+      voice makes audio about 11 times faster than it plays, so a 30-page paper takes under 10 minutes.</span></li>
+    <li><b>Private by design</b><span>No account, no cloud, no tracking inside the app. Your documents never leave your Mac.</span></li>
+    <li><b>Yours to keep</b><span>One price. No subscription, no word limits, no trial that turns into a charge.</span></li>
+  </ul>
+
+  <section class="faq" aria-labelledby="faq-h">
+    <h2 class="sec" id="faq-h">Questions</h2>
+    <h3>Which Macs?</h3>
+    <p>Macs with Apple silicon, on macOS 26.2 or later.</p>
+    <h3>How is this different from the Mac's built-in Speak Selection?</h3>
+    <p>Reader is made for whole documents: a PDF read from start to finish without selecting anything, headings
+      and page clutter handled, a sentence you can follow, and audio files you can keep. Listen to the sample and
+      judge the voice yourself.</p>
+    <h3>Who makes it?</h3>
+    <p>One independent developer, the maker of <a href="./">Rubidu</a>. Reader uses Rubidu's on-device voice.</p>
+  </section>
+</main>
+<script src="js/config.js"></script>
+<script src="js/track.js" defer></script>
+<script>
+// The waitlist: the same private sheet as the home page, told apart by this page's address (the "page" column).
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const ENDPOINT = (window.RUBIDU_FEEDBACK_ENDPOINT || "").trim();
+  let bits = (window.RUBIDU_SITE || {}).powBits || 18, token = "";
+  const q = new URLSearchParams(location.search);
+  let source = q.get("ref") || q.get("utm_source") || "";
+  try { source = source || new URL(document.referrer).hostname; } catch { /* no referrer */ }
+  source = source || "direct";
+
+  // The small puzzle the backend checks before it accepts an email (same as js/site.js).
+  const solve = () => new Promise((resolve) => {
+    const stamp = Date.now(), r = Math.random().toString(36).slice(2, 12).padEnd(10, "0");
+    const prefix = `rubidu:${stamp}.${r}:`, done = (n) => resolve(`${stamp}.${r}:${n}`);
+    const here = async () => {
+      const enc = new TextEncoder();
+      for (let n = 0; ; n++) {
+        const h = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(prefix + n)));
+        let ok = true;
+        for (let i = 0; i < bits && ok; i++) if (h[i >> 3] & (0x80 >> (i & 7))) ok = false;
+        if (ok) return done(n);
+      }
+    };
+    try {
+      const w = new Worker("js/pow-worker.js");
+      w.onmessage = (e) => { w.terminate(); done(e.data); };
+      w.onerror = () => { w.terminate(); here(); };
+      w.postMessage({ prefix, bits });
+    } catch { here(); }
+  });
+
+  const form = $("wl-form"), send = $("wl-send"), status = $("wl-status"), email = $("wl-email");
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    status.className = "status"; status.textContent = "";
+    const value = email.value.trim();
+    if (!/^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]{2,}$/.test(value)) {
+      status.className = "status bad"; status.textContent = "That email doesn't look right."; email.focus(); return;
+    }
+    if (!ENDPOINT) { status.textContent = "The waitlist opens soon. Try again later."; return; }
+    send.disabled = true; send.textContent = "Joining…";
+    const body = new URLSearchParams({ kind: "waitlist", email: value, source,
+      page: location.href.split("#")[0], website: $("wl-website").value });
+    try {
+      let d = null;
+      for (let tries = 0; tries < 2; tries++) {
+        body.set("pow", await solve());
+        d = await (await fetch(ENDPOINT, { method: "POST", body })).json();
+        if (d.error !== "proof") break;
+        bits = d.bits || bits;
+      }
+      if (d && d.ok) {
+        token = d.token || "";
+        form.hidden = true; $("wl-done").hidden = false; $("wl-done").focus({ preventScroll: true });
+        if (d.already) $("wl-pos").textContent = "You were already on the list.";
+      } else if (d && d.error === "email") {
+        status.className = "status bad"; status.textContent = "That email doesn't look right.";
+      } else {
+        status.className = "status bad"; status.textContent = "Lots of people at once. Try again in a minute.";
+      }
+    } catch {
+      status.className = "status bad"; status.textContent = "That didn't go through. Check your connection and try again.";
+    } finally {
+      send.disabled = false; send.textContent = "Join the waitlist";
+    }
+  });
+
+  // The price question: stored on the same row ("uses" = read marks a Reader sign-up).
+  $("wl-pay").addEventListener("click", async (ev) => {
+    const pay = ev.target.closest("button")?.dataset.pay;
+    if (!pay || !token) return;
+    const st = $("wl-more-status");
+    $("wl-pay").querySelectorAll("button").forEach((b) => { b.disabled = true; });
+    try {
+      await fetch(ENDPOINT, { method: "POST", mode: "no-cors",
+        body: new URLSearchParams({ kind: "waitlist_more", token, uses: "read", pay, currency: "USD" }) });
+      st.className = "status ok"; st.textContent = "Thank you. That helps a lot.";
+    } catch {
+      st.className = "status bad"; st.textContent = "That didn't send. Try again?";
+      $("wl-pay").querySelectorAll("button").forEach((b) => { b.disabled = false; });
+    }
+  });
+})();
+</script>
+</body>
+</html>
