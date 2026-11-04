@@ -127,6 +127,27 @@ button.chip:hover { border-color:var(--accent); }
   try { source = source || new URL(document.referrer).hostname; } catch { /* no referrer */ }
   source = source || "direct";
 
+  // Visits, counted the way js/site.js does: only on the real site, never for Do Not Track / Global Privacy
+  // Control, never for the owner (?me stops counting this browser, ?me=off undoes it).
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode: fine */ } },
+  };
+  if (q.has("me")) store.set("rubidu_notrack", q.get("me") === "off" ? "" : "1");
+  const site = window.RUBIDU_SITE || {};
+  const optOut = navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true;
+  if (site.countVisits && ENDPOINT && !optOut && store.get("rubidu_notrack") !== "1" && location.hostname === site.countOn) {
+    const ua = navigator.userAgent, touchMac = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
+    const device = /iPhone/.test(ua) ? "iphone" : (/iPad/.test(ua) || touchMac) ? "ipad" : /Android/.test(ua) ? "android"
+      : /Macintosh/.test(ua) ? "mac" : /Windows/.test(ua) ? "windows" : /Linux|X11/.test(ua) ? "linux" : "other";
+    const day = new Date().toLocaleDateString("en-CA"), fresh = store.get("rubidu_day") !== day;
+    store.set("rubidu_day", day);
+    const hit = new URLSearchParams({ kind: "hit", path: location.pathname, source, device, new: fresh ? "1" : "0" });
+    if (!(navigator.sendBeacon && navigator.sendBeacon(ENDPOINT, hit))) {
+      fetch(ENDPOINT, { method: "POST", mode: "no-cors", body: hit, keepalive: true }).catch(() => {});
+    }
+  }
+
   // The small puzzle the backend checks before it accepts an email (same as js/site.js).
   const solve = () => new Promise((resolve) => {
     const stamp = Date.now(), r = Math.random().toString(36).slice(2, 12).padEnd(10, "0");

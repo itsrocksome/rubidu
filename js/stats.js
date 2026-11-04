@@ -77,6 +77,8 @@
     $("a-waitlist").textContent = fmt(s.total.waitlist);
     chart(s.days);
     bars("st-sources", s.sources);
+    bars("st-pages", s.pages || []);
+    bars("st-wl-pages", Object.entries(s.waitlist.pages || {}));
     bars("st-devices", Object.entries(s.devices));
     bars("st-uses", Object.entries(s.waitlist.uses || {}));
     bars("st-pay", Object.entries(s.waitlist.pay || {}));
@@ -116,6 +118,8 @@
     load();
   });
   $("st-refresh").addEventListener("click", load);
+  // Live: new numbers every minute while the page is in view.
+  setInterval(() => { if (!document.hidden && keep.get()) load(); }, 60000);
   addEventListener("hashchange", () => { if (takeKey()) { $("st-err").hidden = true; load(); } });
   load();
 })();
