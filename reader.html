@@ -48,6 +48,11 @@ button.chip:hover { border-color:var(--accent); }
 .hp { position:absolute; left:-9999px; }
 .faq h3 { font-size:17px; margin:24px 0 4px; }
 .faq p { margin:0; color:var(--mute); }
+.live-count { display:flex; align-items:center; gap:8px; margin:-16px 0 32px; color:var(--mute); font-size:15px; }
+.live-count b { font-variant-numeric:tabular-nums; }
+.live-dot { width:8px; height:8px; border-radius:50%; background:#30d158; animation:live-pulse 2s ease-out infinite; }
+@keyframes live-pulse { 0% { box-shadow:0 0 0 0 rgba(48,209,88,.5); } 100% { box-shadow:0 0 0 8px rgba(48,209,88,0); } }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation:none; } }
 :focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
 </style>
 </head>
@@ -58,6 +63,7 @@ button.chip:hover { border-color:var(--accent); }
   <h1>Listen to your PDFs. In a natural voice, on your Mac.</h1>
   <p class="lede">Drop in a PDF, an article or any text, and Reader reads it to you. The voice runs entirely on your
     Mac, so nothing is uploaded, it works on a plane, and there is no subscription.</p>
+  <p class="live-count" id="live-visitors" hidden><span class="live-dot" aria-hidden="true"></span><span><b id="lv-n">0</b> visitors so far</span></p>
 
   <section class="card" aria-labelledby="hear-h">
     <h2 id="hear-h">Hear it</h2>
@@ -146,6 +152,21 @@ button.chip:hover { border-color:var(--accent); }
     if (!(navigator.sendBeacon && navigator.sendBeacon(ENDPOINT, hit))) {
       fetch(ENDPOINT, { method: "POST", mode: "no-cors", body: hit, keepalive: true }).catch(() => {});
     }
+  }
+
+  // The live visitor counter (same as js/site.js): shown from showCountFrom, refreshed each minute for ten minutes.
+  if (ENDPOINT) {
+    let left = 10;
+    const tick = () => {
+      if (document.hidden) return;
+      fetch(`${ENDPOINT}?kind=count`).then((r) => r.json()).then((d) => {
+        if (!(d.visitors >= (site.showCountFrom || 25))) return;
+        $("lv-n").textContent = d.visitors.toLocaleString();
+        $("live-visitors").hidden = false;
+      }).catch(() => {});
+    };
+    tick();
+    const id = setInterval(() => { tick(); if (--left <= 0) clearInterval(id); }, 60000);
   }
 
   // The small puzzle the backend checks before it accepts an email (same as js/site.js).

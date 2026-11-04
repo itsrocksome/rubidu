@@ -264,6 +264,23 @@ const source = (() => {
   }
 })();
 
+// The live visitor counter: shown once the number is worth showing, refreshed every minute for ten minutes.
+(() => {
+  const box = document.getElementById("live-visitors");
+  if (!box || !ENDPOINT) return;
+  let left = 10;
+  const tick = () => {
+    if (document.hidden) return;
+    fetch(`${ENDPOINT}?kind=count`).then((r) => r.json()).then((d) => {
+      if (!(d.visitors >= (RUBIDU.showCountFrom || 25))) return;
+      document.getElementById("lv-n").textContent = d.visitors.toLocaleString();
+      box.hidden = false;
+    }).catch(() => {});
+  };
+  tick();
+  const id = setInterval(() => { tick(); if (--left <= 0) clearInterval(id); }, 60000);
+})();
+
 // Prices in the visitor's own money: India rupees, the UK pounds, the rest of Europe euros, everyone
 // else dollars. The time zone decides (a browser set to British English in Delhi or New York is
 // common); the language only when the time zone says nothing. Nothing is looked up online.
